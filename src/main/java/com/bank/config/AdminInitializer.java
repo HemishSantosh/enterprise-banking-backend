@@ -9,6 +9,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class AdminInitializer implements CommandLineRunner {
@@ -20,10 +22,19 @@ public class AdminInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        if (!userRepository.existsByEmail("admin@bank.com")) {
+        // Create ROLE_ADMIN if it doesn't exist
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                .orElseGet(() -> {
+                    Role role = Role.builder()
+                            .name("ROLE_ADMIN")
+                            .description("System Administrator")
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    return roleRepository.save(role);
+                });
 
-            Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                    .orElseThrow(() -> new RuntimeException("ROLE_ADMIN not found"));
+        // Create admin user if it doesn't exist
+        if (!userRepository.existsByEmail("admin@bank.com")) {
 
             User admin = User.builder()
                     .firstName("System")
