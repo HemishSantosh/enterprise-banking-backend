@@ -13,6 +13,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(
+        origins = {
+                "https://enterprise-banking-frontend.vercel.app",
+                "http://localhost:5173"
+        },
+        allowCredentials = "true"
+)
 @RequiredArgsConstructor
 public class AuthController {
 
