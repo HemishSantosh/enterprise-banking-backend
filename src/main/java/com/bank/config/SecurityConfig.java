@@ -1,5 +1,5 @@
 package com.bank.config;
-
+import org.springframework.http.HttpMethod;
 import com.bank.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,14 +25,13 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of(
-                "https://enterprise-banking-frontend-49dbbybbv-hemish-s-projects.vercel.app",
+        configuration.setAllowedOriginPatterns(List.of(
+                "https://*.vercel.app",
                 "http://localhost:5173"
         ));
 
@@ -66,20 +65,23 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
+
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/error"
                         ).permitAll()
-                        .anyRequest().authenticated())
+
+                        .anyRequest().authenticated()
+                )
 
                 .authenticationProvider(authenticationProvider)
 
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
-                )
-
-                .httpBasic(Customizer.withDefaults());
+                );
 
         return http.build();
     }
