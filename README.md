@@ -5,11 +5,7 @@ A secure RESTful Banking Application built using Spring Boot, Spring Security, J
 ## 🚀 Live Demo
 
 Backend API:
-https://YOUR-BACKEND-URL.onrender.com
-
-Swagger API:
-https://YOUR-BACKEND-URL.onrender.com/swagger-ui/index.html
-
+https://banking-backend-c2c0.onrender.com
 ---
 
 # 🛠 Tech Stack
