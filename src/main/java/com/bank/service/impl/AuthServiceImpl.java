@@ -31,14 +31,27 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
+        System.out.println("================================");
+        System.out.println("Roles available in database:");
 
+        roleRepository.findAll().forEach(role ->
+                System.out.println(role.getId() + " -> " + role.getName())
+        );
+
+        System.out.println("================================");
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already exists.");
         }
 
+        System.out.println("Searching for ROLE_CUSTOMER...");
+
         Role role = roleRepository.findByName("ROLE_CUSTOMER")
-                .orElseThrow(() ->
-                        new RuntimeException("ROLE_CUSTOMER not found."));
+                .orElseThrow(() -> {
+                    System.out.println("ROLE_CUSTOMER NOT FOUND!");
+                    return new RuntimeException("ROLE_CUSTOMER not found.");
+                });
+
+        System.out.println("Role Found: " + role.getName());
 
         User user = User.builder()
                 .firstName(request.getFirstName())
@@ -73,14 +86,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
+        String email = request.getEmail().trim();
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
         System.out.println("================================");
-        System.out.println("Email: " + request.getEmail());
-        System.out.println("Raw Password: " + request.getPassword());
-        System.out.println("Stored Password: " + user.getPassword());
+        System.out.println("Login Email: " + email);
+        System.out.println("Enabled: " + user.getEnabled());
+        System.out.println("Role: " + user.getRole().getName());
 
         boolean matches = passwordEncoder.matches(
                 request.getPassword(),
@@ -88,16 +103,17 @@ public class AuthServiceImpl implements AuthService {
         );
 
         System.out.println("Password Matches: " + matches);
-        System.out.println("================================");
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        email,
                         request.getPassword()
                 )
         );
 
-        String token = jwtService.generateToken(user.getEmail());
+        System.out.println("Authentication Successful");
+
+        String token = jwtService.generateToken(email);
 
         return new LoginResponse(token, "Login Successful");
     }
